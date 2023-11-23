@@ -6,7 +6,8 @@ import plotly.express as px
 import pandas as pd
 
 # Загрузка данных
-df = pd.read_csv(r"C:\Users\Admin\PycharmProjects\pythonProject\venv\ху_ня.csv")
+file_path = "D:\gitititi\gosha_3.14dor\ху_ня.csv"
+df = pd.read_csv(file_path)
 
 # Создание экземпляра приложения
 app = dash.Dash(__name__)
@@ -14,15 +15,15 @@ app = dash.Dash(__name__)
 # Определение структуры дашборда
 app.layout = html.Div([
     html.Div([
-        html.H1('Дашборд анализа данных о количестве солнечной радиации', style={'textAlign': 'center'}),
-        html.P('Этот дашборд предоставляет информацию о количестве солнечной радиации для различных временных интервалов.',
+        html.H1('Дашборд анализа солнечной радиации', style={'textAlign': 'center'}),
+        html.P('Этот дашборд предоставляет информацию о солнечной радиации для различных временных интервалов.',
                style={'textAlign': 'center'}),
         html.Div([
             html.Label('Выберите дату:', style={'fontSize': 18}),
             dcc.Dropdown(
                 id='date-dropdown',
-                options=[{'label': date, 'value': date} for date in df['Дата']],
-                value=df['Дата'].iloc[0],
+                options=[{'label': date, 'value': date} for date in df['date']],
+                value=df['ghi'].iloc[0],
                 clearable=False,
                 style={'width': '50%', 'margin': '0 auto'}
             ),
@@ -67,30 +68,30 @@ app.layout = html.Div([
 )
 def update_charts(selected_date):
     # Линейный график
-    line_chart = go.Figure(go.Scatter(x=df['Дата'], y=df['Количество солнечной радиации (в Ваттах/квадратный метр)']))
-    line_chart.update_layout(title='Линейный график',
+    line_chart = go.Figure()
+    line_chart.add_trace(go.Scatter(x=df['date'], y=df['ghi'], mode='lines', name='GHI'))
+    line_chart.add_trace(go.Scatter(x=df['date'], y=df['dni'], mode='lines', name='DNI'))
+    line_chart.add_trace(go.Scatter(x=df['date'], y=df['dhi'], mode='lines', name='DHI'))
+    line_chart.update_layout(title='График солнечной радиации',
                              xaxis_title='Дата',
-                             yaxis_title='Количество солнечной радиации (в Ваттах/квадратный метр)',
+                             yaxis_title='Солнечная радиация (в Ваттах/квадратный метр)',
                              plot_bgcolor='rgb(230, 230, 230)')
 
     # Гистограмма
-    histogram = go.Figure(go.Histogram(x=df['Количество солнечной радиации (в Ваттах/квадратный метр)']))
-    histogram.update_layout(title='Гистограмма',
-                            xaxis_title='Количество солнечной радиации (в Ваттах/квадратный метр)',
-                            yaxis_title='Количество наблюдений',
+    histogram = go.Figure(go.Histogram(x=df['ghi']))
+    histogram.update_layout(title='Гистограмма солнечной радиации',
+                            xaxis_title='Солнечная радиация (в Ваттах/квадратный метр)',
+                            yaxis_title='Частота',
                             plot_bgcolor='rgb(230, 230, 230)')
 
     # Круговая диаграмма
-    pie_chart = px.pie(df, names='Время изменения', values='Количество солнечной радиации (в Ваттах/квадратный метр)',
-                       title='Круговая диаграмма')
+    pie_chart = px.pie(df, names='date', values='ghi', title='Круговая диаграмма солнечной радиации')
 
     # Ящик с усами
-    box_plot = px.box(df, x='Время изменения', y='Количество солнечной радиации (в Ваттах/квадратный метр)',
-                      title='Ящик с усами')
+    box_plot = px.box(df, x='date', y='ghi', title='Ящик с усами солнечной радиации')
 
     # Точечный график
-    scatter_plot = px.scatter(df, x='Время изменения', y='Количество солнечной радиации (в Ваттах/квадратный метр)',
-                             title='Точечный график')
+    scatter_plot = px.scatter(df, x='date', y='ghi', title='Точечный график солнечной радиации')
 
     return line_chart, histogram, pie_chart, box_plot, scatter_plot
 
